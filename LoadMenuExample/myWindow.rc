@@ -1,0 +1,26 @@
+#include "MyHeader.h"
+#include "winres.h"
+
+
+MYMENU MENU DISCARDABLE
+BEGIN
+	MENUITEM "&White-Color", IDM_WHITE
+	MENUITEM "&Light-Gray-Color", IDM_LTGRAY
+	MENUITEM "&Gray-Color", IDM_GRAY
+	MENUITEM "&Dark-Gray-Color", IDM_DKGRAY
+	MENUITEM "&Black-Color", IDM_BLACK
+	MENUITEM "&about ...", IDM_APP_ABOUT
+END
+
+
+ABOUT DIALOG DISCARDABLE  32,32,180,100
+STYLE DS_MODALFRAME | WS_POPUP
+FONT 8, "MS Sans Serif"
+
+BEGIN
+	DEFPUSHBUTTON "OK", IDOK, 66,80,50,14
+	CTEXT "about", IDC_STATIC, 40,12,100,8
+	CTEXT "Hi My name is omkar Ajagunde ...", IDC_STATIC, 7,40,166,8
+	CTEXT "OmkarAjagunde", IDC_STATIC, 7,62,166,8
+END
+	

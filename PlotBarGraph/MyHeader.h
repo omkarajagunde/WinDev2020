@@ -1,0 +1,6 @@
+#pragma once
+#define IDM_SELECTIONSORT 1000
+#define IDM_BUBBLESORT 2000
+#define IDM_APPABOUT 3000
+#define IDC_STATIC 5000
+#define MYMENU 9000

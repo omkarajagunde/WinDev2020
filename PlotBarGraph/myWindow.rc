@@ -1,0 +1,23 @@
+#include "MyHeader.h"
+#include "winres.h"
+
+MYMENU MENU
+BEGIN
+
+	MENUITEM "&Selection sort", IDM_SELECTIONSORT
+	MENUITEM "&Bubble sort", IDM_BUBBLESORT
+	MENUITEM "&about", IDM_APPABOUT
+
+END
+
+ABOUT DIALOG DISCARDABLE 32,32,180,100
+STYLE DS_MODALFRAME | WS_POPUP
+FONT 8, "MS Sans serif"
+
+BEGIN
+	DEFPUSHBUTTON "OK", IDOK, 66,80,50,14
+	CTEXT "about", IDC_STATIC, 40,12,100,8
+	CTEXT "SortingVisualisation in Win32SDk, inspired and dedicated to AstroMediComp", IDC_STATIC, 7,40,166,8
+	CTEXT "Omkar Ajagunde", IDC_STATIC, 7,62,166,8
+	
+END

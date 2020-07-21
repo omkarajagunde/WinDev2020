@@ -1,0 +1,4 @@
+#include "MyHeader.h"
+HORSEBITMAP BITMAP horse.bmp
+LIONBITMAP BITMAP lion.bmp
+DOGBITMAP BITMAP dog.bmp
