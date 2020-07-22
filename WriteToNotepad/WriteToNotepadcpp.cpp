@@ -46,11 +46,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPevInstance, LPSTR lpszCmdLin
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT imsg, WPARAM wParam, LPARAM lParam) {
+	
+	HDC hdc;
+	RECT rc;
+	PAINTSTRUCT ps;
+	
+	
 	switch (imsg) {
-
-		HDC hdc;
-		RECT rc;
-		PAINTSTRUCT ps;
 		
 
 	case WM_DESTROY:
