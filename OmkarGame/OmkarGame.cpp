@@ -10,15 +10,17 @@ void drawShooter(HWND, HDC, int);
 void calcFireBallPoints(HWND);
 
 
+
 RECT rc;
 RECT rcShooter;
 HBRUSH hBrush;
 TCHAR buff[40];
 POINT pt[5];
 RECT rect;
-RECT fireBallRect, prevFireBallRect;
+RECT fireBallRect, prevFireBallRect, clr;
 int topPt = 10;
 int bottomPt = 5;
+static int shootFlag = 0;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow) {
 
@@ -31,7 +33,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	wndClass.lpfnWndProc = WndProc;
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
-	wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wndClass.hCursor = LoadCursor(NULL, IDC_HAND);
 	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wndClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
@@ -72,27 +74,26 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc = NULL;
 	PAINTSTRUCT ps;
 
-	HBITMAP hBitmap = NULL;
-	HDC hdcmem = NULL;
-	BITMAP bitmap;
 	static HINSTANCE hInstance;
 	static int backArtInit = 1;
 	static int shooterAngle = 0;
 	static RECT shooterRect;
-	static int shootFlag = 0;
+	
 
 	switch (iMsg) {
 
 	case WM_CREATE:
-		hInstance = GetModuleHandle(NULL);
 		SetTimer(hwnd, MYTIMER, 10, NULL);
-		hBitmap = LoadBitmap(hInstance, MAKEINTRESOURCE(BACKBITMAP));
-		hdcmem = CreateCompatibleDC(NULL);
+		clr.top = -160;
+		clr.left = -160;
+		clr.right = 160;
+		clr.bottom = 160;
+
+		hInstance = (LPCREATESTRUCT)lParam->hInstance;
+
 		break;
 
 	case WM_DESTROY:
-		DeleteObject(hBitmap);
-		DeleteDC(hdcmem);
 		PostQuitMessage(0);
 		break;
 
@@ -101,7 +102,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 		KillTimer(hwnd, MYTIMER);
 		if (shootFlag == 1)
 			calcFireBallPoints(hwnd);
-		InvalidateRect(hwnd, &prevFireBallRect, true);
+		InvalidateRect(hwnd, &rc, true);
 		SetTimer(hwnd, MYTIMER, 10, NULL);
 		break;
 
@@ -114,21 +115,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			shooterAngle -= 5;
 			if (shooterAngle <= -90)
 				shooterAngle = -90;
-			PlaySound(TEXT("tank.wav"),NULL,SND_FILENAME | SND_ASYNC);
+			PlaySound(TEXT("tank.wav"), NULL, SND_FILENAME | SND_ASYNC);
 			//topPt = 10;
 			//bottomPt = 5;
-			InvalidateRect(hwnd, &rc, false);
+			InvalidateRect(hwnd, &rc, true);
 		}
 
 		if (wParam == 0x25) {
 			//shootFlag = 0;
 			shooterAngle += 5;
-			if (shooterAngle >= 90 )
+			if (shooterAngle >= 90)
 				shooterAngle = 90;
 			PlaySound(TEXT("tank.wav"), NULL, SND_FILENAME | SND_ASYNC);
 			//topPt = 10;
 			//bottomPt = 5;
-			InvalidateRect(hwnd, &rc, false);
+			InvalidateRect(hwnd, &rc, true);
 		}
 
 		if (wParam == 0x26) {
@@ -141,19 +142,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_PAINT:
 		//MessageBox(hwnd, TEXT("arrow Keys"), TEXT("keys Event"), MB_OKCANCEL);
-		
-		wsprintf(buff,TEXT("                       Angle  %d"),-shooterAngle);
+
+		wsprintf(buff, TEXT("                       Angle  %d"), -shooterAngle);
 		GetClientRect(hwnd, &rc);
 		hdc = BeginPaint(hwnd, &ps);
-
-		// initialise background -art
 		
-		SelectObject(hdcmem, hBitmap);
-		GetObject(hBitmap, sizeof(BITMAP), &bitmap);
-		StretchBlt(hdc, 0, 0, rc.right, rc.bottom, hdcmem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
+		
+		// initialise background -art
 
-			
-			
+		
+
 		// shooter -functions
 		hBrush = CreateSolidBrush(RGB(128, 128, 255));
 		SelectObject(hdc, hBrush);
@@ -164,14 +162,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			SelectObject(hdc, hBrush);
 			Ellipse(hdc, fireBallRect.left, fireBallRect.top, fireBallRect.right, fireBallRect.bottom);
 		}
-		
+
 		hBrush = CreateSolidBrush(RGB(255, 128, 128));
 		SelectObject(hdc, hBrush);
 
 		// Angle text show
-		DrawText(hdc,buff,40,&rc, DT_SINGLELINE);
+		DrawText(hdc, buff, 40, &rc, DT_SINGLELINE);
 		// Show earth glowing ...
-		Ellipse(hdc, - 80,  - 80, 80,  80);
+		Ellipse(hdc, -80, -80, 80, 80);
 
 		EndPaint(hwnd, &ps);
 		break;
@@ -186,18 +184,25 @@ void drawShooter(HWND hwnd, HDC hdc, int angle) {
 
 	int xPt, yPt;
 
-	SetViewportOrgEx(hdc, rc.right/2, rc.bottom - 25, NULL);
-	
+	SetViewportOrgEx(hdc, rc.right / 2, rc.bottom - 25, NULL);
+
+
+	rect.left = pt[1].x;
+	rect.top = pt[1].y;
+	rect.right = pt[3].x;
+	rect.bottom = pt[3].y;
+
+
 	pt[0].x = -20;
 	pt[0].y = 0;
 
-	xPt = - 20;
-	yPt = - 150;
+	xPt = -20;
+	yPt = -150;
 	pt[1].x = (int)(xPt * cos(TWOPI * angle / 360) + yPt * sin(TWOPI * angle / 360));
 	pt[1].y = (int)(yPt * cos(TWOPI * angle / 360) - xPt * sin(TWOPI * angle / 360));
 
-	xPt =  + 20;
-	yPt =  - 150;
+	xPt = +20;
+	yPt = -150;
 	pt[2].x = (int)(xPt * cos(TWOPI * angle / 360) + yPt * sin(TWOPI * angle / 360));
 	pt[2].y = (int)(yPt * cos(TWOPI * angle / 360) - xPt * sin(TWOPI * angle / 360));
 
@@ -207,19 +212,13 @@ void drawShooter(HWND hwnd, HDC hdc, int angle) {
 	pt[4].x = -20;
 	pt[4].y = 0;
 
-
-	rect.left = pt[1].x;
-	rect.top = pt[1].y;
-	rect.right = pt[3].x;
-	rect.bottom = pt[3].y;
-	InvalidateRect(hwnd, &rect, true);
-	
 	Polygon(hdc, pt, 5);
+	
 }
 
 void calcFireBallPoints(HWND hwnd) {
 
-	
+
 
 	// Slope of a line m = y2 -y1/ x2 -x1
 	float arbitrarySlope = (pt[1].y - pt[0].y) / (pt[1].x - pt[0].x);
@@ -236,11 +235,16 @@ void calcFireBallPoints(HWND hwnd) {
 	topPt += 10;
 	bottomPt += 10;
 
-	if (topPt > rc.right/2)
+	if (topPt > rc.right / 2) {
 		topPt = 10;
-	if (bottomPt > rc.bottom)
+		KillTimer(hwnd, MYTIMER);
+		shootFlag = 0;
+	}
+	if (bottomPt > rc.bottom) {
 		bottomPt = 5;
+		KillTimer(hwnd, MYTIMER);
+		shootFlag = 0;
+	}
 
-
+	InvalidateRect(hwnd, &prevFireBallRect, true);
 }
-
