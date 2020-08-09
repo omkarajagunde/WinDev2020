@@ -1,0 +1,95 @@
+﻿#include<windows.h>
+#include<math.h>
+
+#define NUM 1000
+#define TWOPI (2 * 3.14159)
+
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow) {
+
+	WNDCLASSEX wndClass;
+	MSG msg;
+	TCHAR szAppName[] = TEXT("SineWaveProgram");
+	HWND hwnd;
+
+	wndClass.cbSize = sizeof(WNDCLASSEX);
+	wndClass.cbClsExtra = 0;
+	wndClass.cbWndExtra = 0;
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wndClass.hCursor = LoadCursor(NULL, IDC_HAND);
+	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wndClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wndClass.hInstance = hInstance;
+	wndClass.lpfnWndProc = WndProc;
+	wndClass.lpszClassName = szAppName;
+	wndClass.lpszMenuName = NULL;
+	wndClass.style = CS_HREDRAW | CS_VREDRAW;
+
+	RegisterClassEx(&wndClass);
+
+	hwnd = CreateWindow(
+	
+		szAppName,
+		TEXT("SineWave Program CHARLES-PETZOLD"),
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		NULL,
+		NULL,
+		hInstance,
+		NULL
+
+	);
+
+	ShowWindow(hwnd, iCmdShow);
+	UpdateWindow(hwnd);
+
+	while (GetMessage(&msg, NULL, 0, 0)) {
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return ((int)msg.wParam);
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
+
+	static int cxClient, cyClient;
+	HDC hdc;
+	int i;
+	PAINTSTRUCT ps;
+	POINT apt[NUM];
+
+	switch (iMsg) {
+
+	case WM_SIZE:
+		cxClient = LOWORD(lParam);
+		cyClient = HIWORD(lParam);
+		return 0;
+
+	case WM_CREATE:
+
+		break;
+
+	case WM_PAINT:
+		hdc = BeginPaint(hwnd, &ps);
+		MoveToEx(hdc, 0, cyClient / 2, NULL);
+		LineTo(hdc, cxClient, cyClient / 2);
+
+		for (i = 0; i < NUM; i++) {
+			apt[i].x = i * cxClient / NUM;
+			apt[i].y = (int)(cyClient / 2 * (1 -sin(TWOPI * i / NUM)));
+		}
+
+		Polyline(hdc, apt, NUM);
+		break;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	}
+	return (DefWindowProc(hwnd, iMsg, wParam, lParam));
+}
