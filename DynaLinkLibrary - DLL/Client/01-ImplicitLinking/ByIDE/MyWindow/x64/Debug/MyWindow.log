@@ -1,0 +1,4 @@
+﻿  MyWindow.cpp
+MyWindow.obj : error LNK2019: unresolved external symbol MakeSquare referenced in function "__int64 __cdecl MyWndProcedure(struct HWND__ *,unsigned int,unsigned __int64,__int64)" (?MyWndProcedure@@YA_JPEAUHWND__@@I_K_J@Z)
+MyMath.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+D:\WinDev\DynaLinkLibrary - DLL\Client\01-ImplicitLinking\ByIDE\MyWindow\x64\Debug\MyWindow.exe : fatal error LNK1120: 1 unresolved externals

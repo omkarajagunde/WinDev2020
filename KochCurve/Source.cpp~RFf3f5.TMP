@@ -1,0 +1,114 @@
+#include<windows.h>
+#include<math.h>
+
+#define M_PI 3.14159265358979323846
+
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+void curve(int, int, int, int, int);
+
+HWND gHwnd;
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpSzCmdLine, int iCmdShow) {
+
+	WNDCLASSEX wndClass;
+	HWND hwnd;
+	MSG msg;
+	TCHAR szAppName[] = TEXT("KochCurveApp");
+
+	wndClass.lpszClassName = szAppName;
+	wndClass.cbSize = sizeof(wndClass);
+	wndClass.cbClsExtra = 0;
+	wndClass.cbWndExtra = 0;
+	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wndClass.hCursor = LoadCursor(NULL, IDC_HAND);
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wndClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wndClass.lpfnWndProc = WndProc;
+	wndClass.lpszMenuName = NULL;
+	wndClass.hInstance = hInstance;
+	wndClass.style = CS_HREDRAW | CS_VREDRAW;
+
+	RegisterClassEx(&wndClass);
+
+	hwnd = CreateWindow(szAppName,
+		TEXT("Koch Curve -Omkar -Ajagunde"),
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		NULL,
+		NULL,
+		hInstance,
+		NULL
+	);
+
+	ShowWindow(hwnd, iCmdShow);
+	UpdateWindow(hwnd);
+
+	while (GetMessage(&msg, NULL, 0, 0)) {
+
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+	return((int)msg.wParam);
+
+}
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wparam, LPARAM lparam) {
+
+	gHwnd = hwnd;
+
+	switch (iMsg) {
+
+	case WM_PAINT:
+		curve(100, 100, 400, 400, 8);
+		break;
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	}
+	return(DefWindowProc(hwnd, iMsg, wparam, lparam));
+}
+
+
+void curve(int x1, int y1, int x2, int y2, int iter) {
+
+	static HDC hdc;
+
+	float angle = 60 * M_PI / 180;
+
+	int x3 = (2 * x1 + x2) / 3;
+	int y3 = (2 * y1 + y2) / 3;
+
+	int x4 = (x1 + 2 * x2) / 3;
+	int y4 = (y1 + 2 * y2) / 3;
+
+	int x = x3 + (x4 - x3) * cos(angle) + (y4 - y3) * sin(angle);
+	int y = y3 - (x4 - x3) * sin(angle) + (y4 - y3) * cos(angle);
+
+	if (iter > 0) {
+		curve(x1, y1, x3, y3, iter - 1);
+		curve(x3, y3, x, y, iter - 1);
+		curve(x, y, x4, y4, iter - 1);
+		curve(x4, y4, x2, y2, iter - 1);
+
+	}
+	else {
+
+		hdc = GetDC(gHwnd);
+		MoveToEx(hdc, x1, y1, NULL);
+		LineTo(hdc, x3, y3);
+
+		MoveToEx(hdc, x3, y3, NULL);
+		LineTo(hdc, x, y);
+
+		MoveToEx(hdc, x, y, NULL);
+		LineTo(hdc, x4, y4);
+
+		MoveToEx(hdc, x4, y4, NULL);
+		LineTo(hdc, x2, y2);
+
+	}
+}

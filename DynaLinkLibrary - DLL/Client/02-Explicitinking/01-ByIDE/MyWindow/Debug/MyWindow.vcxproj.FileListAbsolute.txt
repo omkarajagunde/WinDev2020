@@ -1,0 +1,4 @@
+D:\WinDev\DynaLinkLibrary - DLL\Client\01-ImplicitLinking\ByIDE\MyWindow\Debug\MyWindow.exe
+D:\WinDev\DynaLinkLibrary - DLL\Client\01-ImplicitLinking\ByIDE\MyWindow\Debug\MyWindow.pdb
+D:\WinDev\DynaLinkLibrary - DLL\Client\02-Explicitinking\01-ByIDE\MyWindow\Debug\MyWindow.exe
+D:\WinDev\DynaLinkLibrary - DLL\Client\02-Explicitinking\01-ByIDE\MyWindow\Debug\MyWindow.pdb

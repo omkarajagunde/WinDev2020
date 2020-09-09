@@ -2,13 +2,20 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
+#include<process.h>
+#include<math.h>
 
 
 #define MYTIMER 200
+#define MYTIMER2 200
 
 // window procedure callback
 LRESULT CALLBACK MyWndProcedure(HWND, UINT, WPARAM, LPARAM);
+void CALLBACK TimerProc(HWND, UINT, UINT_PTR, DWORD);
 void Draw(HWND);
+void FreeResources();
+void __cdecl ThreadProcOne(void*);
+void __cdecl ThreadProcTwo(void*);
 
 long ContourCount = 0;
 long PointsCount = 0;
@@ -21,12 +28,23 @@ int** DrawPoints = NULL;
 char buff[10];
 FILE* fptr = NULL;
 
+const TCHAR * fileName;
+static int i = 1, j = 0;
+HDC hdc;
 
+TCHAR str[255];
+RECT rc;
+
+HBRUSH hBrush;
+HPEN hPen;
 
 
 // WinMain() -> __WinMainCRTStartup() -> main()
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
 {
+	// take file name as input from commandline ...
+	fileName = lpszCmdLine;
+
 	WNDCLASSEX wndClass;
 	MSG msg;
 	TCHAR szAppName[] = TEXT("MyWindowApp");
@@ -49,26 +67,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 
 	int xCalc = GetSystemMetrics(SM_CXSCREEN);
 	int yCalc = GetSystemMetrics(SM_CYSCREEN);
-	xCalc -= 800;
-	xCalc /= 2;
-
-	yCalc -= 600;
-	yCalc /= 2;
 
 	hwnd = CreateWindow(szAppName,
 		TEXT("Ganpati Bappa Morya"),
 		WS_OVERLAPPEDWINDOW,
+		0,
+		0,
 		xCalc,
 		yCalc,
-		800,
-		600,
 		NULL,
 		NULL,
 		hInstance,
 		NULL
 		);
 
-	ShowWindow(hwnd, iCmdShow);
+	ShowWindow(hwnd, SW_MAXIMIZE);
 	UpdateWindow(hwnd);
 
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -83,122 +96,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 LRESULT CALLBACK MyWndProcedure(HWND hwnd, UINT iMsg, WPARAM wparam, LPARAM lparam)
 {
 	
-	static int i = 0;
-	int j;
 	int ret;
 	TCHAR str[255];
+	static unsigned long hThreadOne = NULL;
+	static unsigned long hThreadTwo = NULL;
+
+	
 
 	switch (iMsg)
 	{
 	case WM_CREATE:
 
-		if ((fptr = fopen("points.txt", "r")) == NULL) {
-			MessageBox(hwnd, TEXT("Error opening file"), TEXT("Bye !!!"), MB_OK);
-			exit(0);
-		}
-
-
-		// To get the number of contours
-		while (fgets(buff, 20, fptr) != NULL) {
-			if (strcmp(buff, "****\n") == 0) {
-				ContourCount++;
-			}
-		}
-
-		// Allocation of array where the points are to be stored ...
-		PointsArray = (int*)malloc(ContourCount * sizeof(int));
-		// Allocation of array where the actual points will be stored ... at this stage in code
-		// we just know the count of contours...
-		DrawPoints = (int**)malloc(ContourCount * sizeof(int*));
-
-		ContourCount = 0;
-		PointsCount = 0;
-		fseek(fptr, 0, SEEK_SET);
-
-		// Here we will find the count of total points in each Contours,
-		// based on this count we will be able to allocate the memory for actual points to be stored ... afterwards
-		while (fgets(buff, 20, fptr) != NULL) {
-			if (strcmp(buff, "****\n") == 0) {
-				//printf("Contour no. %d   |   POINTS size. : %d\n", ContourCount, PointsCount);
-				PointsArray[ContourCount] = PointsCount;
-				PointsCount = 0;
-				ContourCount++;
-			}
-			else
-				PointsCount++;
-
-		}
-
-		// we have points count in each contour in the form of array 
-		// so we will iterate over array and actually allocate the memory where points are to be stored ...
-		for (int i = 0; i < ContourCount; i++) {
-			DrawPoints[i] = (int*)malloc(PointsArray[i] * sizeof(int));
-		}
-
-		ContourCount = 0;
-		PointsCount = 0;
-		fseek(fptr, 0, SEEK_SET);
-
-		// Now we will fill points in **DrawContours 
-		while (fgets(buff, 20, fptr) != NULL) {
-
-			if (strcmp(buff, "****\n") == 0) {
-				PointsCount = 0;
-				ContourCount++;
-			}
-			else {
-				DrawPoints[ContourCount][PointsCount] = atoi(buff);
-				PointsCount++;
-			}
-
-
-		}
+		hThreadOne = _beginthread(ThreadProcOne, 0, (void*)hwnd);
 		
-		SetTimer(hwnd, MYTIMER, 300, NULL);
-
 		break;
+
 	case WM_PAINT:
+
+		GetClientRect(hwnd, &rc);
+
+		hThreadTwo = _beginthread(ThreadProcTwo, 0, (void*)hwnd);
+
 		break;
 
 	case WM_TIMER:
 
-		HDC hdc;
-		HBRUSH hBrush;
-		HPEN hPen;
-
-		hdc = GetDC(hwnd);
-		hBrush = CreateSolidBrush(RGB(255, 128, 0));
-		SelectObject(hdc, hBrush);
-		hPen = CreatePen(PS_SOLID, 3, RGB(255, 255, 0));
-		SelectObject(hdc, hPen);
-		KillTimer(hwnd, MYTIMER);
-
-		if (i < ContourCount) {
-			for (int j = 0; j < PointsArray[i] - 1; j += 2) {
-				MoveToEx(hdc, DrawPoints[i][j], DrawPoints[i][j + 1], NULL);
-				LineTo(hdc, DrawPoints[i][j], DrawPoints[i][j + 1]);
-			}
-			i++;
-		}
-
-
-		ReleaseDC(hwnd, hdc);
-		SetTimer(hwnd, MYTIMER, 150, NULL);
+		
 
 		break;
 
 	case WM_DESTROY:
-		MessageBox(hwnd, TEXT("Bye I'm saaad you are leaving mee!"), TEXT("Bye !!!"), MB_OK);
-		fclose(fptr);
-		free(PointsArray);
-		for (int i = 0; i < ContourCount; i++) {
-			free(DrawPoints[i]);
-		}
-		free(DrawPoints);
-
-		fptr = NULL;
-		DrawPoints = NULL;
-		PointsArray = NULL;
+		FreeResources();
 		PostQuitMessage(0);
 
 	default:
@@ -207,4 +135,124 @@ LRESULT CALLBACK MyWndProcedure(HWND hwnd, UINT iMsg, WPARAM wparam, LPARAM lpar
 	return(DefWindowProc(hwnd, iMsg, wparam, lparam));
 }
 
+void FreeResources() {
+
+	fclose(fptr);
+	free(PointsArray);
+	for (int i = 0; i < ContourCount; i++) {
+		free(DrawPoints[i]);
+	}
+	free(DrawPoints);
+
+	fptr = NULL;
+	DrawPoints = NULL;
+	PointsArray = NULL;
+}
+
+void __cdecl ThreadProcOne(void *param) {
+
+	if ((fptr = fopen(fileName, "r")) == NULL) {
+		MessageBox((HWND)param, TEXT("Error opening file"), TEXT("Message"), MB_OK | MB_ICONWARNING);
+		exit(0);
+	}
+
+
+	// To get the number of contours
+	while (fgets(buff, 20, fptr) != NULL) {
+		if (strcmp(buff, "****\n") == 0) {
+			ContourCount++;
+		}
+	}
+
+	// Allocation of array where the points are to be stored ...
+	PointsArray = (int*)malloc(ContourCount * sizeof(int));
+	// Allocation of array where the actual points will be stored ... at this stage in code
+	// we just know the count of contours...
+	DrawPoints = (int**)malloc(ContourCount * sizeof(int*));
+
+	ContourCount = 0;
+	PointsCount = 0;
+	fseek(fptr, 0, SEEK_SET);
+
+	// Here we will find the count of total points in each Contours,
+	// based on this count we will be able to allocate the memory for actual points to be stored ... afterwards
+	while (fgets(buff, 20, fptr) != NULL) {
+		if (strcmp(buff, "****\n") == 0) {
+			//printf("Contour no. %d   |   POINTS size. : %d\n", ContourCount, PointsCount);
+			PointsArray[ContourCount] = PointsCount;
+			PointsCount = 0;
+			ContourCount++;
+		}
+		else
+			PointsCount++;
+
+	}
+
+	// we have points count in each contour in the form of array 
+	// so we will iterate over array and actually allocate the memory where points are to be stored ...
+	for (int i = 0; i < ContourCount; i++) {
+		DrawPoints[i] = (int*)malloc(PointsArray[i] * sizeof(int));
+	}
+
+	ContourCount = 0;
+	PointsCount = 0;
+	fseek(fptr, 0, SEEK_SET);
+
+	// Now we will fill points in **DrawContours 
+	while (fgets(buff, 20, fptr) != NULL) {
+
+		if (strcmp(buff, "****\n") == 0) {
+			PointsCount = 0;
+			ContourCount++;
+		}
+		else {
+			DrawPoints[ContourCount][PointsCount] = atoi(buff);
+			PointsCount++;
+		}
+
+
+	}
+}
+
+void __cdecl ThreadProcTwo(void* param) {
+
+	static int r = 255, g = 128, b = 0;
+	hdc = GetDC((HWND)param);
+	SetViewportOrgEx(hdc, rc.right / 4 + 50, 50, NULL);
+	hBrush = CreateSolidBrush(RGB(247, 221, 196));
+	SelectObject(hdc, hBrush);
+	hPen = CreatePen(PS_INSIDEFRAME, 2, RGB(173, 139, 245));
+	SelectObject(hdc, hPen);
+	
+	
+
+	for (i = ContourCount - 1; i > 0; i--) {
+
+		wsprintf(str, TEXT("Drawing contour number, %d  "), i);
+		DrawText(hdc, str, -1, &rc, DT_VCENTER);
+
+
+		for (int j = 0; j < PointsArray[i] - 1; j += 2) {
+
+			Sleep(3);
+			//MoveToEx(hdc, DrawPoints[i][j], DrawPoints[i][j + 1], NULL);
+			//LineTo(hdc, DrawPoints[i][j], DrawPoints[i][j + 1]);
+			//SetPixel(hdc, DrawPoints[i][j], DrawPoints[i][j + 1], RGB(247, 221, 196));
+			Ellipse(hdc, DrawPoints[i][j] - 2, DrawPoints[i][j + 1] - 2, DrawPoints[i][j] + 2, DrawPoints[i][j + 1] + 2);
+
+			
+		}
+		
+		g++;
+		b++;
+		if (r > 255)
+			g = 128;
+		if (r > 255)
+			b = 0;
+		
+	}
+
+	ReleaseDC((HWND)param, hdc);
+	_endthread();
+}
 

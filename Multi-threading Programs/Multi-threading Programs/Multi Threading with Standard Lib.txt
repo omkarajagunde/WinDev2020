@@ -1,0 +1,57 @@
+1. Start Visual Studio 2005 IDE.
+2. Click on 'File' menu.
+3. Go to ' New -> Project' menu(Ctrl+shift+n).
+4. Click on it and you will see a dialog titled New Project.
+5. This dialog is divided into two parts (left(Project Types) and right(Templates) panel) from left(Project Types) panel select Win32.
+6. From Right(Templates) panel select Win32Project.
+7. Below is one text box enter name of the project in  text box.
+8. Below that is a Combo box enter the Location (Where you want to store the project) in this Combo box or you can choose the path from browse button.
+9. There are two Check boxes below this:: 
+										I.  Create directory for solution.
+										II. Add to source control.
+   Uncheck both of them and then click on OK.
+10. You will see Win32 AppWizard with your Project title and it is showing overview of your project. It is again divided into two panels.
+11. Now Click on next or click on Application settings on left panel and you will go to application Settings.
+12. There are four radio button::
+								 I.   Windows Application.
+								 II.  Console Application.
+								 III. Dll.
+								 IV.  Static Library.
+	Select (I) i.e. windows application from this.
+13. Below that is a check box saying 'Empty Project' check that and Click on Finish.
+14. Now Title of IDE window is same as of your application (And Microsoft Visual Studio).
+15. Now go to 'Project' menu from there go to 'Project->Add New Item'(Ctrl+Shift+a).
+16. "Add New Item" Dialog will appear this is also divided into two parts left(Categories) and right (Templates) from Left select Utility and
+	from Right Select text file.
+17. Now give a name to your file and make sure you are saving it in the Project's Directory only (Save it with '.c' Extension). A Tab with your file name will appear in your IDE.
+
+NOTE : By The Way, As Every "CPP" Program Is "C" Program, We May Select "C++ Source File" As File Type In Step 15, & Proceed
+As Usual To Write Our "C" Program In C++ Source File Without Giving Any Explicit Extension Because We Already Have ".cpp" Extension By Default.
+
+18. Now go to Project -> Project Properties (or click Alt+F7) a Dialog with your project's property pages will appear.
+19. Go to 'Configuration Properties' and select general in Left panel.
+20. Now go to 'Character Set' Properties select it and set it to 'Not Set'.
+
+NOTE:
+	1. This tells which kind of character set we are going to use in our project we can also choose "Use Unicode Character Set"  if the application
+	is Unicode compliant or to "Use Multi byte character set" if it is not Unicode compliant.
+	By the way there are two ways to set Unicode character set::
+		I.  First as mentioned above.
+		II. Second is by writing "#define UNICODE" in our code.
+		we are going to use second Method.
+
+21. Now Write the Multi Threading with standard library Generic Application's Code And Save It.
+22. Now go to Build and Click on 'Compile' (F7)  after that click on Build.
+NOTE:
+	The other way of doing it by going at build menu and hitting Rebuild all or your project specific Build.
+23. You can execute your application by following 5 ways::
+
+I. 		Go to Debug Menu Click on Start Debugging.
+
+II. 	Go to Debug Menu Click on Start without Debugging.
+
+III.    Open "My Computer" Or "Explorer", Navigate To Your Project's "Debug" ( Or "Release" ) Directory And Double Click On Your Project's Exe.
+
+IV.     Go To "Start\Run", Browse To Navigate Your Exe's Path And When Found Press "OK" Button Of "Run" Dialog Box.
+
+V. 		As Usual Start "Command Prompt", Go To The Path Of Project's Exe By One Or More "CD" Commands, Type Exe's Name And Press Enter To Execute It.

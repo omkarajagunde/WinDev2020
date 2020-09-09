@@ -1,0 +1,4 @@
+D:\WinDev\DynaLinkLibrary - DLL\Server\declspec-dll\01-ByIDE\MyMath\Debug\MyMath.dll
+D:\WinDev\DynaLinkLibrary - DLL\Server\declspec-dll\01-ByIDE\MyMath\Debug\MyMath.pdb
+D:\WinDev\DynaLinkLibrary - DLL\Server\def-dll\01-ByIDE\MyMath\Debug\MyMath.dll
+D:\WinDev\DynaLinkLibrary - DLL\Server\def-dll\01-ByIDE\MyMath\Debug\MyMath.pdb

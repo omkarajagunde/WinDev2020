@@ -1,0 +1,3 @@
+﻿  OmkarGame.cpp
+OmkarGame.obj : error LNK2019: unresolved external symbol __imp__PlaySoundW@12 referenced in function "long __stdcall WndProc(struct HWND__ *,unsigned int,unsigned int,long)" (?WndProc@@YGJPAUHWND__@@IIJ@Z)
+D:\WinDev\OmkarGame\Debug\OmkarGame.exe : fatal error LNK1120: 1 unresolved externals

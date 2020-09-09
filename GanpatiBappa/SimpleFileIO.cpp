@@ -7,7 +7,7 @@ int main(void) {
 	char buff[10];
 	FILE *fptr = NULL;
 
-	if ((fptr = fopen("points2.txt", "r")) == NULL){
+	if ((fptr = fopen("map.txt", "r")) == NULL){
 		printf("Error opening file\nTry again\n");
 		exit(0);
 	}
